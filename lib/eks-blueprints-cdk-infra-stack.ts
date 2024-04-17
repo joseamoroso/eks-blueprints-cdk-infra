@@ -14,7 +14,7 @@ export class EksBlueprintsCdkInfraStack extends cdk.Stack {
     const _id = new Namer([id]);
     eksBlueprints.HelmAddOn.validateHelmVersions = true; // optional if you would like to check for newer versions
 
-    const buildArgoBootstrap = new eksBlueprints.ArgoCDAddOn({
+    const buildArgoBootstrap: eksBlueprints.ArgoCDAddOnProps = {
       name: 'addons',
       version: '6.7.11',
       bootstrapRepo: {
@@ -22,16 +22,37 @@ export class EksBlueprintsCdkInfraStack extends cdk.Stack {
         path: 'chart',
         targetRevision: 'main',
       },
+    };
+
+    const devBootstrapProps = new eksBlueprints.ArgoCDAddOn({
+      ...buildArgoBootstrap,
       workloadApplications: [
         {
-          name: 'workloads',
+          name: 'dev-workloads',
           namespace: 'default',
           values: [],
           repository: {
             repoUrl:
-              'https://github.com/joseamoroso/eks-blueprints-workloads-charts.git',
-            path: 'argocd',
-            targetRevision: 'master',
+              'https://github.com/joseamoroso/eks-blueprints-workloads-charts',
+            path: 'argocd/dev',
+            targetRevision: 'main',
+          },
+        },
+      ],
+    });
+
+    const prodBootstrapProps = new eksBlueprints.ArgoCDAddOn({
+      ...buildArgoBootstrap,
+      workloadApplications: [
+        {
+          name: 'prod-workloads',
+          namespace: 'default',
+          values: [],
+          repository: {
+            repoUrl:
+              'https://github.com/joseamoroso/eks-blueprints-workloads-charts',
+            path: 'argocd/prod',
+            targetRevision: 'main',
           },
         },
       ],
@@ -39,7 +60,7 @@ export class EksBlueprintsCdkInfraStack extends cdk.Stack {
 
     const mngClusterProvider = new eksBlueprints.MngClusterProvider({
       nodegroupName: _id.addSuffix(['Mng']).kebab,
-      instanceTypes: [InstanceType.of(InstanceClass.M7G, InstanceSize.LARGE)],
+      instanceTypes: [InstanceType.of(InstanceClass.M5, InstanceSize.LARGE)],
       minSize: 2,
     });
 
@@ -52,6 +73,9 @@ export class EksBlueprintsCdkInfraStack extends cdk.Stack {
         },
       }),
       new eksBlueprints.addons.ExternalDnsAddOn({
+        values: {
+          zoneIdFilter: hostedZoneID,
+        },
         hostedZoneResources: [hostedZoneID],
       }),
     ];
@@ -70,9 +94,17 @@ export class EksBlueprintsCdkInfraStack extends cdk.Stack {
       );
 
     builder
+      .clone()
       .addOns(...addons)
-      .addOns(buildArgoBootstrap)
+      .addOns(devBootstrapProps)
       .enableGitOps(eksBlueprints.GitOpsMode.APP_OF_APPS)
-      .build(this, _id.kebab);
+      .build(this, _id.addSuffix(['dev']).kebab);
+
+    builder
+      .clone()
+      .addOns(...addons)
+      .addOns(prodBootstrapProps)
+      .enableGitOps(eksBlueprints.GitOpsMode.APP_OF_APPS)
+      .build(this, _id.addSuffix(['prod']).kebab);
   }
 }
