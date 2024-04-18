@@ -11,10 +11,9 @@ export class EksBlueprintsCdkInfraStack extends cdk.Stack {
     props: cdk.StackProps = { env: { region: 'us-east-1' } },
   ) {
     super(scope, id, props);
-    const _id = new Namer([id]);
     eksBlueprints.HelmAddOn.validateHelmVersions = true; // optional if you would like to check for newer versions
 
-    const buildArgoBootstrap: eksBlueprints.ArgoCDAddOnProps = {
+    const buildArgoBootstrap = new eksBlueprints.ArgoCDAddOn({
       name: 'addons',
       version: '6.7.11',
       bootstrapRepo: {
@@ -22,14 +21,10 @@ export class EksBlueprintsCdkInfraStack extends cdk.Stack {
         path: 'chart',
         targetRevision: 'main',
       },
-    };
-
-    const devBootstrapProps = new eksBlueprints.ArgoCDAddOn({
-      ...buildArgoBootstrap,
       workloadApplications: [
         {
           name: 'dev-workloads',
-          namespace: 'default',
+          namespace: 'dev',
           values: [],
           repository: {
             repoUrl:
@@ -38,15 +33,9 @@ export class EksBlueprintsCdkInfraStack extends cdk.Stack {
             targetRevision: 'main',
           },
         },
-      ],
-    });
-
-    const prodBootstrapProps = new eksBlueprints.ArgoCDAddOn({
-      ...buildArgoBootstrap,
-      workloadApplications: [
         {
           name: 'prod-workloads',
-          namespace: 'default',
+          namespace: 'prod',
           values: [],
           repository: {
             repoUrl:
@@ -59,12 +48,10 @@ export class EksBlueprintsCdkInfraStack extends cdk.Stack {
     });
 
     const mngClusterProvider = new eksBlueprints.MngClusterProvider({
-      nodegroupName: _id.addSuffix(['Mng']).kebab,
+      nodegroupName: `${id}Mng`,
       instanceTypes: [InstanceType.of(InstanceClass.M5, InstanceSize.LARGE)],
       minSize: 2,
     });
-
-    const hostedZoneID = 'MyHostedZone1';
 
     const addons = [
       new eksBlueprints.addons.AwsLoadBalancerControllerAddOn({
@@ -72,15 +59,10 @@ export class EksBlueprintsCdkInfraStack extends cdk.Stack {
           serviceAccountName: 'aws-load-balancer-controller',
         },
       }),
-      new eksBlueprints.addons.ExternalDnsAddOn({
-        values: {
-          zoneIdFilter: hostedZoneID,
-        },
-        hostedZoneResources: [hostedZoneID],
-      }),
+      buildArgoBootstrap
     ];
 
-    const builder = eksBlueprints.EksBlueprint.builder()
+    eksBlueprints.EksBlueprint.builder()
       .version('auto')
       .region(props.env?.region)
       .clusterProvider(mngClusterProvider)
@@ -88,23 +70,8 @@ export class EksBlueprintsCdkInfraStack extends cdk.Stack {
         eksBlueprints.GlobalResources.Vpc,
         new eksBlueprints.VpcProvider(),
       )
-      .resourceProvider(
-        hostedZoneID,
-        new eksBlueprints.LookupHostedZoneProvider('joseamoroso.com'),
-      );
-
-    builder
-      .clone()
       .addOns(...addons)
-      .addOns(devBootstrapProps)
       .enableGitOps(eksBlueprints.GitOpsMode.APP_OF_APPS)
-      .build(this, _id.addSuffix(['dev']).kebab);
-
-    builder
-      .clone()
-      .addOns(...addons)
-      .addOns(prodBootstrapProps)
-      .enableGitOps(eksBlueprints.GitOpsMode.APP_OF_APPS)
-      .build(this, _id.addSuffix(['prod']).kebab);
+      .build(this, id);
   }
 }
