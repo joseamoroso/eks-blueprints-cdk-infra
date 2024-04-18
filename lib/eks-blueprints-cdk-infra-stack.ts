@@ -14,6 +14,12 @@ export class EksBlueprintsCdkInfraStack extends cdk.Stack {
 
     eksBlueprints.HelmAddOn.validateHelmVersions = true; // optional if you would like to check for newer versions
 
+    const adminTeam = new eksBlueprints.PlatformTeam({
+      name: 'admins',
+      userRoleArn:
+        'arn:aws:iam::321852949023:role/AWSReservedSSO_AccesoAdministrador_beef58d1f2a77d76',
+    });
+
     const mngClusterProvider = new eksBlueprints.MngClusterProvider({
       nodegroupName: `${id}Mng`,
       instanceTypes: [InstanceType.of(InstanceClass.M5, InstanceSize.LARGE)],
@@ -36,6 +42,7 @@ export class EksBlueprintsCdkInfraStack extends cdk.Stack {
         eksBlueprints.GlobalResources.Vpc,
         new eksBlueprints.VpcProvider(),
       )
+      .teams(adminTeam)
       .addOns(...addons)
       .build(this, id);
   }
