@@ -14,9 +14,9 @@ export class EksBlueprintsCdkInfraStack extends cdk.Stack {
     eksBlueprints.HelmAddOn.validateHelmVersions = true; // optional if you would like to check for newer versions
 
     const buildArgoBootstrap = new eksBlueprints.ArgoCDAddOn({
-      name: 'addons',
       version: '6.7.11',
       bootstrapRepo: {
+        name: 'addons',
         repoUrl: 'https://github.com/joseamoroso/eks-blueprints-add-ons.git',
         path: 'chart',
         targetRevision: 'main',
@@ -47,6 +47,12 @@ export class EksBlueprintsCdkInfraStack extends cdk.Stack {
       ],
     });
 
+    const adminTeam = new eksBlueprints.PlatformTeam({
+      name: 'admins',
+      userRoleArn:
+        'arn:aws:iam::321852949023:role/AWSReservedSSO_AccesoAdministrador_beef58d1f2a77d76',
+    });
+
     const mngClusterProvider = new eksBlueprints.MngClusterProvider({
       nodegroupName: `${id}Mng`,
       instanceTypes: [InstanceType.of(InstanceClass.M5, InstanceSize.LARGE)],
@@ -59,7 +65,7 @@ export class EksBlueprintsCdkInfraStack extends cdk.Stack {
           serviceAccountName: 'aws-load-balancer-controller',
         },
       }),
-      buildArgoBootstrap
+      buildArgoBootstrap,
     ];
 
     eksBlueprints.EksBlueprint.builder()
@@ -70,6 +76,7 @@ export class EksBlueprintsCdkInfraStack extends cdk.Stack {
         eksBlueprints.GlobalResources.Vpc,
         new eksBlueprints.VpcProvider(),
       )
+      .teams(adminTeam)
       .addOns(...addons)
       .enableGitOps(eksBlueprints.GitOpsMode.APP_OF_APPS)
       .build(this, id);
