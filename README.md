@@ -107,7 +107,7 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 kubectl port-forward service/blueprints-addon-argocd-server -n argocd 8080:443
 ```
 
-1. In a browser, navigate to `localhost:8080`, you will see a screen the following one:
+1. In a browser, navigate to `http://localhost:8080`, you will see a screen the following one:
 
 ![argocd](./assets/argocd.png)
 
@@ -121,7 +121,7 @@ By default the username is `admin` and password is the value stored in [step 3](
 2. Test the application in working. First add the record set:
 
 ```bash
-HOSTED_ZONE_ID="Z06211301F84XBWTCJ0IE"
+HOSTED_ZONE_ID="Z012345ABCDEF"
 aws route53 change-resource-record-sets \
     --hosted-zone-id YOUR_HOSTED_ZONE_ID \
     --change-batch '{
