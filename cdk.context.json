@@ -6,9 +6,5 @@
     "us-east-1d",
     "us-east-1e",
     "us-east-1f"
-  ],
-  "hosted-zone:account=321852949023:domainName=joseamoroso.com:region=us-east-1": {
-    "Id": "/hostedzone/Z06211301F84XBWTCJ0IE",
-    "Name": "joseamoroso.com."
-  }
+  ]
 }
