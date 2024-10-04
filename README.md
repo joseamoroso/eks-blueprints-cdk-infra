@@ -6,13 +6,13 @@ This tutorial will deploy an EKS cluster using the EKS Blueprints project and Ar
 
 ### Pre-requirements
 
-1. Create a directory where we’ll clone the git repositories. 
+1. Create a directory where we’ll clone the git repositories.
 
 ```bash
 mkdir ~/eks-blueprints-gitops && cd ~/eks-blueprints-gitops
 ```
 
-1. Clone necessary repositories for the demo
+2. Clone necessary repositories for the demo
 
 ```bash
 # eks-blueprints-cdk-infra provides the IaC and ArgoCD initial settings
@@ -28,15 +28,15 @@ git clone https://github.com/joseamoroso/eks-blueprints-cdk-infra.git
 # git clone https://github.com/joseamoroso/eks-blueprints-workloads-charts.git
 ```
 
-1. Install `aws-cdk` in your cli. Instructions here:
+3. Install `aws-cdk` in your cli. Instructions here:
 
 [Getting started with the AWS CDK - AWS Cloud Development Kit (AWS CDK) v2](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html#getting_started_install)
 
-1. (Optional) Install kubectl. Documentation:
+- (Optional) Install kubectl. Documentation:
 
 [Install Tools](https://kubernetes.io/docs/tasks/tools/)
 
-1. Get access to an AWS account where you have permissions to deploy the infrastructure.
+4. Get access to an AWS account where you have permissions to deploy the infrastructure.
 
 ### Instructions
 
@@ -86,7 +86,7 @@ To see all the Kubernetes resources, we run:
 kubectl get all -A
 ```
 
-1. Add workloads and addons (including ArgoCD) settings for GitOps
+2. Add workloads and addons (including ArgoCD) settings for GitOps
 
 ```bash
 git checkout gitops # Switch to branch that has the required changes
@@ -94,31 +94,32 @@ cdk diff # See new resources added and replaced
 cdk deploy --all --require-approval never --method direct
 ```
 
-1. Get ArgoCD secret for console access
+3. Get ArgoCD secret for console access
 
 ```bash
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 ```
 
-1. Copy and store the password, as we will need it later
-2. Forward traffic internally to expose ArgoCD on the local system
+4. Copy and store the password, as we will need it later
+5. Forward traffic internally to expose ArgoCD on the local system
 
 ```bash
 kubectl port-forward service/blueprints-addon-argocd-server -n argocd 8080:443
 ```
 
-1. In a browser, navigate to `http://localhost:8080`, you will see a screen the following one:
+6. In a browser, navigate to `http://localhost:8080`, you will see a screen the following one:
 
 ![argocd](./assets/argocd.png)
 
 By default the username is `admin` and password is the value stored in [step 3](https://www.notion.so/Desplegando-apps-con-EKS-blueprints-y-GitOps-f5861cc6e29741ebaa4b13ac81bc7438?pvs=21)
 
-1. You should be redirected to ArgoCD dashboard:
+7. You should be redirected to ArgoCD dashboard:
 
 ![argocd-dashboard](./assets/argocd-dashboard.png)
 
-1. Now you can add any change to `eks-blueprints-workloads-charts` or `eks-blueprints-add-ons` and you’ll see these changes being managed by ArgoCD.
-2. Test the application in working. First add the record set:
+8. Now you can add any change to `eks-blueprints-workloads-charts` or `eks-blueprints-add-ons` and you’ll see these changes being managed by ArgoCD.
+Test the application in working.
+(OPTIONAL) Add a record set for the ingress in the demo app:
 
 ```bash
 HOSTED_ZONE_ID="Z012345ABCDEF"
