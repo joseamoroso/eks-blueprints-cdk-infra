@@ -1,4 +1,4 @@
-# Desplegando apps con EKS blueprints y GitOps
+# Deploying apps with EKS blueprints y GitOps
 
 This tutorial will deploy an EKS cluster using the EKS Blueprints project and ArgoCD. Both tools allow us to manage our apps by using GitOps.
 
