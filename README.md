@@ -18,14 +18,6 @@ mkdir ~/eks-blueprints-gitops && cd ~/eks-blueprints-gitops
 # eks-blueprints-cdk-infra provides the IaC and ArgoCD initial settings
 git clone https://github.com/joseamoroso/eks-blueprints-cdk-infra.git
 
-# # eks-blueprints-app-sample is a Python application example  
-# git clone https://github.com/joseamoroso/eks-blueprints-app-sample.git
-
-# # eks-blueprints-add-ons contains helm charts and settings for addons
-# git clone https://github.com/joseamoroso/eks-blueprints-add-ons.git
-
-# # eks-blueprints-workloads-charts contains helm charts and settings for apps 
-# git clone https://github.com/joseamoroso/eks-blueprints-workloads-charts.git
 ```
 
 3. Install `aws-cdk` in your cli. Instructions here:
