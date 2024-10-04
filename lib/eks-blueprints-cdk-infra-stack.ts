@@ -2,7 +2,6 @@ import * as cdk from 'aws-cdk-lib';
 import * as eksBlueprints from '@aws-quickstart/eks-blueprints';
 import { Construct } from 'constructs';
 import { InstanceClass, InstanceSize, InstanceType } from 'aws-cdk-lib/aws-ec2';
-import { Namer } from 'multi-convention-namer';
 
 export class EksBlueprintsCdkInfraStack extends cdk.Stack {
   constructor(
@@ -47,15 +46,9 @@ export class EksBlueprintsCdkInfraStack extends cdk.Stack {
       ],
     });
 
-    const adminTeam = new eksBlueprints.PlatformTeam({
-      name: 'admins',
-      userRoleArn:
-        'arn:aws:iam::321852949023:role/AWSReservedSSO_AccesoAdministrador_beef58d1f2a77d76',
-    });
-
     const mngClusterProvider = new eksBlueprints.MngClusterProvider({
       nodegroupName: `${id}Mng`,
-      instanceTypes: [InstanceType.of(InstanceClass.M5, InstanceSize.LARGE)],
+      instanceTypes: [InstanceType.of(InstanceClass.T3, InstanceSize.MEDIUM)],
       minSize: 2,
     });
 
@@ -76,7 +69,6 @@ export class EksBlueprintsCdkInfraStack extends cdk.Stack {
         eksBlueprints.GlobalResources.Vpc,
         new eksBlueprints.VpcProvider(),
       )
-      .teams(adminTeam)
       .addOns(...addons)
       .enableGitOps(eksBlueprints.GitOpsMode.APP_OF_APPS)
       .build(this, id);
