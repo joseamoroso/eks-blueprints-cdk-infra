@@ -22,24 +22,22 @@ export class EksBlueprintsCdkInfraStack extends cdk.Stack {
       },
       workloadApplications: [
         {
-          name: 'dev-workloads',
+          name: 'nodejs-auth-app-dev',
           namespace: 'dev',
           values: [],
           repository: {
-            repoUrl:
-              'https://github.com/joseamoroso/eks-blueprints-workloads-charts',
-            path: 'argocd/dev',
+            repoUrl: 'https://github.com/joseamoroso/nodejs-auth-app',
+            path: 'charts/argocd/dev',
             targetRevision: 'main',
           },
         },
         {
-          name: 'prod-workloads',
+          name: 'nodejs-auth-app-prod',
           namespace: 'prod',
           values: [],
           repository: {
-            repoUrl:
-              'https://github.com/joseamoroso/eks-blueprints-workloads-charts',
-            path: 'argocd/prod',
+            repoUrl: 'https://github.com/joseamoroso/nodejs-auth-app',
+            path: 'charts/argocd/prod',
             targetRevision: 'main',
           },
         },
